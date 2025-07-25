@@ -1,0 +1,575 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Default (Light) Theme Variables */
+:root {
+  --bg-color: #f4f7f6;
+  --text-color: #2c3e50;
+  --editor-bg: #ffffff;
+  --border-color: #ddd;
+  --shadow-color: rgba(0,0,0,0.1);
+  --button-primary: #007bff;
+  --button-primary-hover: #0056b3;
+  --button-secondary: #4CAF50; /* Green for AI hint button */
+  --button-secondary-hover: #45a049;
+  --output-bg: #e9ecef;
+  --output-border: #ced4da;
+  --output-text: #343a40;
+  --ai-hint-bg: #e0f2f7;
+  --ai-hint-border: #b3e5fc;
+  --ai-hint-text: #383d41;
+  --code-block-bg: #f0f0f0; /* for markdown code blocks within AI hint */
+  --code-block-border: #ccc;
+
+  /* Hint specific colors (consistent with previous hints) */
+  --hint-error-bg: #f8d7da; --hint-error-border: #f5c6cb; --hint-error-text: #721c24;
+  --hint-warning-bg: #fff3cd; --hint-warning-border: #ffeeba; --hint-warning-text: #856404;
+  --hint-refactor-bg: #d1ecf1; --hint-refactor-border: #bee5eb; --hint-refactor-text: #0c5460;
+  --hint-hint-bg: #d4edda; --hint-hint-border: #c3e6cb; --hint-hint-text: #155724;
+}
+
+/* Dark Theme Variables */
+.dark-theme {
+  --bg-color: #282c34;
+  --text-color: #f8f8f2;
+  --editor-bg: #1e1e1e;
+  --border-color: #444;
+  --shadow-color: rgba(0,0,0,0.4);
+  --button-primary: #61dafb;
+  --button-primary-hover: #21a1f1;
+  --button-secondary: #98c379;
+  --button-secondary-hover: #83b369;
+  --output-bg: #3c4149;
+  --output-border: #555;
+  --output-text: #f8f8f2;
+  --ai-hint-bg: #3a3f4a;
+  --ai-hint-border: #5b6271;
+  --ai-hint-text: #f8f8f2;
+  --code-block-bg: #2d2d2d;
+  --code-block-border: #555;
+
+  /* Hint specific colors for dark theme */
+  --hint-error-bg: #5a2e31; --hint-error-border: #721c24; --hint-error-text: #f8d7da;
+  --hint-warning-bg: #634f19; --hint-warning-border: #856404; --hint-warning-text: #fff3cd;
+  --hint-refactor-bg: #2d5560; --hint-refactor-border: #0c5460; --hint-refactor-text: #d1ecf1;
+  --hint-hint-bg: #2b5d3a; --hint-hint-border: #155724; --hint-hint-text: #d4edda;
+}
+
+
+/* Base Styles */
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2.5em;
+  color: var(--text-color);
+}
+
+/* Theme Toggle Switch */
+.theme-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.theme-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+
+/* Main content area - flex container for editor and output */
+.content-area {
+  display: flex;
+  gap: 20px; /* Space between editor and output sections */
+  flex-grow: 1;
+}
+
+/* Editor container */
+.editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--editor-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px var(--shadow-color);
+  padding: 15px;
+  margin-right: 20px;
+  position: relative; /* ADDED FOR RESET BUTTON POSITIONING */
+  min-height: 400px; /* Ensure a minimum height */
+}
+
+/* Editor wrapper */
+.editor-wrapper {
+  flex-grow: 1;
+  overflow: auto; /* Enable scrolling for large code blocks */
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  margin-bottom: 15px; /* Space between editor and buttons */
+  background-color: var(--editor-bg); /* Ensure editor background is consistent */
+  font-size: 0.95em;
+}
+
+/* react-simple-code-editor styles */
+.editor {
+  min-height: 100%; /* Make editor fill its wrapper */
+  font-family: 'Fira code', 'Fira Mono', monospace;
+  font-size: 1em;
+  line-height: 1.5;
+  color: var(--text-color);
+  tab-size: 4;
+  outline: none;
+  background-color: var(--editor-bg); /* Ensure background is set */
+}
+
+/* Style for Prism.js highlighting */
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: slategray; }
+.token.punctuation { color: #999; }
+.token.namespace { opacity: .7; }
+.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: #905; }
+.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: #690; }
+.token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string { color: #9a6e3a; background: hsla(0, 0%, 100%, .5); }
+.token.atrule, .token.attr-value, .token.keyword { color: #07a; }
+.token.function, .token.class-name { color: #DD4A68; }
+.token.regex, .token.important, .token.variable { color: #e90; }
+.token.important, .token.bold { font-weight: bold; }
+.token.italic { font-style: italic; }
+.token.entity { cursor: help; }
+
+
+/* Button Container */
+.button-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap to next line on smaller screens */
+  gap: 10px; /* Space between buttons */
+  margin-top: auto; /* Push buttons to the bottom of the editor-container */
+}
+
+.button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-weight: 500;
+  flex-shrink: 0; /* Prevent buttons from shrinking */
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+/* Specific button styles */
+.button:not(.ai-button):not(.explain-button):not(.fix-button):not(.save-button):not(.load-button) {
+    background-color: var(--button-primary);
+    color: white;
+}
+.button:not(.ai-button):not(.explain-button):not(.fix-button):not(.save-button):not(.load-button):hover {
+    background-color: var(--button-primary-hover);
+}
+
+.ai-button {
+  background-color: var(--button-secondary);
+  color: white;
+}
+.ai-button:hover {
+  background-color: var(--button-secondary-hover);
+}
+
+.explain-button {
+  background-color: #ffc107; /* Yellowish */
+  color: #333;
+}
+.explain-button:hover {
+  background-color: #e0a800;
+}
+
+.fix-button {
+  background-color: #dc3545; /* Red for a "fix" action */
+  color: white;
+}
+.fix-button:hover {
+  background-color: #c82333;
+}
+
+.save-button, .load-button {
+    background-color: #17a2b8; /* Teal color */
+    color: white;
+}
+
+.save-button:hover, .load-button:hover {
+    background-color: #138496;
+}
+
+.save-status {
+  margin-left: 10px;
+  font-size: 0.9em;
+  color: var(--text-color);
+  align-self: center; /* Align with buttons */
+}
+
+/* Output Container */
+.output-container {
+  flex: 1;
+  background-color: var(--output-bg);
+  border: 1px solid var(--output-border);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px var(--shadow-color);
+  color: var(--output-text);
+  overflow-y: auto; /* Enable scrolling for long outputs */
+}
+
+.output-container h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: var(--text-color);
+  font-size: 1.5em;
+}
+
+.output-box {
+  background-color: var(--editor-bg);
+  border: 1px solid var(--border-color);
+  padding: 15px;
+  border-radius: 5px;
+  white-space: pre-wrap; /* Preserve whitespace and wrap long lines */
+  word-break: break-all; /* Break long words */
+  max-height: 300px; /* Limit height and add scroll */
+  overflow-y: auto;
+  font-family: 'Fira code', 'Fira Mono', monospace;
+  font-size: 0.9em;
+  line-height: 1.4;
+  color: var(--output-text);
+}
+
+.output-box.error {
+  background-color: var(--hint-error-bg); /* Use error hint background */
+  color: var(--hint-error-text);
+  border: 1px solid var(--hint-error-border);
+}
+
+/* Hints container */
+.hints-container {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.hints-container h2 {
+    font-size: 1.3em;
+}
+
+.hint-item {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  border-left: 5px solid;
+  font-size: 0.9em;
+}
+
+/* Hint types */
+.hint-item.error { background-color: var(--hint-error-bg); border-color: var(--hint-error-border); color: var(--hint-error-text); }
+.hint-item.warning { background-color: var(--hint-warning-bg); border-color: var(--hint-warning-border); color: var(--hint-warning-text); }
+.hint-item.refactor { background-color: var(--hint-refactor-bg); border-color: var(--hint-refactor-border); color: var(--hint-refactor-text); }
+.hint-item.hint { background-color: var(--hint-hint-bg); border-color: var(--hint-hint-border); color: var(--hint-hint-text); }
+
+
+/* AI Hint Box */
+.ai-hint-box, .ai-explanation-box, .ai-fixed-code-box {
+  background-color: var(--ai-hint-bg);
+  border: 1px solid var(--ai-hint-border);
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 50px;
+  margin-top: 20px;
+  font-size: 0.95em;
+  line-height: 1.6;
+  box-shadow: 0 4px 8px var(--shadow-color);
+  color: var(--ai-hint-text); /* Default text color for AI boxes */
+}
+
+.ai-hint-box h3, .ai-explanation-box h3, .ai-fixed-code-box h3 {
+    margin-top: 0;
+    color: var(--text-color); /* Ensure heading matches theme text color */
+    font-weight: 600;
+}
+
+/* Styles for markdown rendering within AI hints/explanations/fixes */
+.ai-hint-box pre, .ai-explanation-box pre, .ai-fixed-code-box pre {
+    background-color: var(--code-block-bg) !important;
+    border: 1px solid var(--code-block-border) !important;
+    padding: 15px !important;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-family: '"Fira code", "Fira Mono", monospace'; /* Keep code font for code blocks */
+    font-size: 0.85em;
+    line-height: 1.4;
+    color: var(--text-color) !important; /* Ensure code text color follows theme */
+}
+
+.ai-hint-box code, .ai-explanation-box code, .ai-fixed-code-box code {
+    font-family: '"Fira code", "Fira Mono", monospace'; /* Keep code font for inline code */
+    background-color: var(--code-block-bg) !important;
+    padding: 2px 4px !important;
+    border-radius: 3px;
+    font-size: 0.9em;
+    color: var(--text-color) !important; /* Ensure inline code color follows theme */
+}
+
+.ai-hint-box strong, .ai-explanation-box strong, .ai-fixed-code-box strong {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.ai-hint-box p, .ai-explanation-box p, .ai-fixed-code-box li, .ai-fixed-code-box p {
+    color: var(--text-color);
+}
+
+
+/* Reset Icon Button (from previous step) */
+.reset-icon-button {
+  position: absolute;
+  top: 10px; /* Adjust as needed */
+  right: 10px; /* Adjust as needed */
+  background-color: var(--button-primary); /* Or a neutral color like #6c757d */
+  color: white;
+  border: none;
+  border-radius: 50%; /* Makes it circular */
+  width: 35px; /* Size of the button */
+  height: 35px; /* Size of the button */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em; /* Size of the symbol */
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 10; /* Ensure it's above the editor */
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.reset-icon-button:hover {
+  background-color: var(--button-primary-hover); /* Or darker shade of neutral */
+  transform: rotate(30deg); /* Small rotation effect on hover */
+}
+
+
+/* --- RESPONSIVE DESIGN MEDIA QUERIES --- */
+
+/* For screens smaller than 1024px (e.g., tablets in landscape, smaller laptops) */
+@media (max-width: 1024px) {
+  .header h1 {
+    font-size: 2em;
+  }
+
+  .button {
+    padding: 8px 15px;
+    font-size: 0.9em;
+  }
+
+  .editor-container, .output-container {
+    padding: 15px;
+  }
+
+  .ai-hint-box, .ai-explanation-box, .ai-fixed-code-box {
+    padding: 15px;
+    font-size: 0.9em;
+  }
+}
+
+/* For screens smaller than 768px (e.g., tablets in portrait, large phones) */
+@media (max-width: 768px) {
+  .content-area {
+    flex-direction: column; /* Stack editor and output vertically */
+    gap: 15px;
+  }
+
+  .editor-container {
+    margin-right: 0; /* Remove right margin when stacked */
+    min-height: 350px; /* Slightly reduce min-height for smaller screens */
+  }
+
+  .output-container {
+    min-height: 250px; /* Ensure output has a minimum visible height */
+  }
+
+  .header {
+    flex-direction: column; /* Stack header elements */
+    align-items: flex-start;
+    padding-bottom: 15px;
+  }
+
+  .header h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+  }
+
+  .theme-toggle-switch {
+    margin-top: 10px;
+  }
+
+  .button-container {
+    justify-content: center; /* Center buttons when they wrap */
+    gap: 8px;
+  }
+}
+
+/* For screens smaller than 480px (e.g., mobile phones) */
+@media (max-width: 480px) {
+  .container {
+    padding: 10px; /* Reduce overall padding */
+  }
+
+  .header h1 {
+    font-size: 1.8em;
+  }
+
+  .editor-container {
+    padding: 10px;
+    min-height: 300px;
+  }
+
+  .editor-wrapper {
+    margin-bottom: 10px;
+  }
+
+  .editor {
+    font-size: 0.9em; /* Smaller font in editor */
+  }
+
+  .button {
+    padding: 8px 12px;
+    font-size: 0.85em;
+    flex-grow: 1; /* Allow buttons to grow and fill space, perhaps two per row */
+  }
+
+  .reset-icon-button {
+    width: 30px;
+    height: 30px;
+    font-size: 1em;
+    top: 5px;
+    right: 5px;
+  }
+
+  .output-container {
+    padding: 15px;
+    min-height: 200px;
+  }
+
+  .output-container h2 {
+    font-size: 1.3em;
+  }
+
+  .output-box {
+    font-size: 0.8em; /* Smaller font in output/error boxes */
+    max-height: 200px;
+  }
+
+  .hints-container h2 {
+    font-size: 1.1em;
+  }
+
+  .hint-item {
+    font-size: 0.8em;
+    padding: 8px;
+  }
+
+  .ai-hint-box, .ai-explanation-box, .ai-fixed-code-box {
+    padding: 10px;
+    font-size: 0.85em;
+  }
+}
+.inline-code {
+  font-family: 'Fira code', 'Fira Mono', monospace;
+  background-color: var(--code-block-bg); /* Use code block background for consistency */
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em; /* Slightly smaller for inline */
+  color: var(--text-color); /* Ensure text color is thematic */
+}
