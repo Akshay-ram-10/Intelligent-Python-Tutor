@@ -7,6 +7,9 @@ build/ # Common build output directory for React apps
 .env.development.local
 .env.test.local
 .env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Python
 __pycache__/
@@ -26,11 +29,8 @@ pip-delete-this-arg.txt
 # Environment variables (CRITICAL: DO NOT COMMIT YOUR API KEY)
 .env
 
-# Operating System Files
+# Operating System & Editor Files
 .DS_Store
 .idea/ # IntelliJ/PyCharm project files
 .vscode/ # VS Code settings (optional, you might keep settings.json if shared)
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
